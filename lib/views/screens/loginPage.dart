@@ -1,4 +1,5 @@
 import 'package:chat_app/helper/auth_helper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
@@ -168,15 +169,48 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Container(
-                        height: 48,
-                        width: 48,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                  "https://tse1.mm.bing.net/th?id=OIP.FnzI6eBMBS9n8VL7Wy39mAHaHa&pid=Api&P=0&h=180"),
-                            )),
+                      GestureDetector(
+                        onTap: () async {
+                          try {
+                            User? res =
+                                await AuthHelper.authHelper.SignInWithGoogle();
+
+                            if (res != null) {
+                              // Successfully signed in, navigate to the main page
+                              Get.offAllNamed(
+                                '/', // Replace with your main page route
+                                arguments: res,
+                              );
+                            } else {
+                              // Sign-in failed, display a Snackbar with an error message
+                              Get.snackbar(
+                                "Chat App",
+                                "Sign In Failed...",
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            }
+                          } catch (error) {
+                            // Handle exceptions that might occur during sign-in process
+                            print("Error during Google Sign-In: $error");
+                            Get.snackbar(
+                              "Chat App",
+                              "An error occurred. Please try again later.",
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
+                          }
+                        },
+                        child: Container(
+                          height: 48,
+                          width: 48,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                    "https://tse1.mm.bing.net/th?id=OIP.FnzI6eBMBS9n8VL7Wy39mAHaHa&pid=Api&P=0&h=180"),
+                              )),
+                        ),
                       ),
                       //Anonymous
                       GestureDetector(
