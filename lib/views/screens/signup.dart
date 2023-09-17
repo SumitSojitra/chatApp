@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../controller/controller.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -22,11 +25,9 @@ class _SignUpState extends State<SignUp> {
   String? email;
   String? password;
 
-  bool pass = true;
-  bool pass1 = true;
-
   @override
   Widget build(BuildContext context) {
+    var myController = Get.put(MyController());
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -77,36 +78,38 @@ class _SignUpState extends State<SignUp> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          validator: (val) {
-                            if (val!.isEmpty) {
-                              return "Enter valid Password..";
-                            }
-                            return null;
-                          },
-                          obscureText: pass,
-                          controller: passwordController,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.blueGrey.shade50,
-                            hintStyle:
-                                GoogleFonts.roboto(fontWeight: FontWeight.w400),
-                            hintText: "Password",
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15),
+                        child: Obx(
+                          () => TextFormField(
+                            validator: (val) {
+                              if (val!.isEmpty) {
+                                return "Enter valid Password..";
+                              }
+                              return null;
+                            },
+                            obscureText: myController.pass1.value,
+                            controller: passwordController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.blueGrey.shade50,
+                              hintStyle: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.w400),
+                              hintText: "Password",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              pass = !pass;
-                            });
-                          },
-                          icon: (pass == false)
-                              ? Icon(CupertinoIcons.eye)
-                              : Icon(CupertinoIcons.eye_slash))
+                      Obx(
+                        () => IconButton(
+                            onPressed: () {
+                              myController.ShowPassWord1();
+                            },
+                            icon: (myController.pass1.value == false)
+                                ? Icon(CupertinoIcons.eye)
+                                : Icon(CupertinoIcons.eye_slash)),
+                      ),
                     ],
                   ),
                   SizedBox(
@@ -115,36 +118,38 @@ class _SignUpState extends State<SignUp> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          validator: (val) {
-                            if (val!.isEmpty) {
-                              return "Wrong Password..";
-                            }
-                            return null;
-                          },
-                          obscureText: pass1,
-                          controller: confirmController,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.blueGrey.shade50,
-                            hintStyle:
-                                GoogleFonts.roboto(fontWeight: FontWeight.w400),
-                            hintText: "Confirm Password",
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15),
+                        child: Obx(
+                          () => TextFormField(
+                            validator: (val) {
+                              if (val!.isEmpty) {
+                                return "Wrong Password..";
+                              }
+                              return null;
+                            },
+                            obscureText: myController.pass2.value,
+                            controller: confirmController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.blueGrey.shade50,
+                              hintStyle: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.w400),
+                              hintText: "Confirm Password",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              pass1 = !pass1;
-                            });
-                          },
-                          icon: (pass1 == false)
-                              ? Icon(CupertinoIcons.eye)
-                              : Icon(CupertinoIcons.eye_slash))
+                      Obx(
+                        () => IconButton(
+                            onPressed: () {
+                              myController.ShowPassWord2();
+                            },
+                            icon: (myController.pass2.value == false)
+                                ? Icon(CupertinoIcons.eye)
+                                : Icon(CupertinoIcons.eye_slash)),
+                      ),
                     ],
                   ),
                   SizedBox(
@@ -155,15 +160,17 @@ class _SignUpState extends State<SignUp> {
                       if (formKey.currentState!.validate()) {
                         formKey.currentState!.save();
 
-                        emailController.clear();
-                        passwordController.clear();
-                        confirmController.clear();
-
                         email = emailController.text;
                         password = passwordController.text;
 
                         AuthHelper.authHelper
-                            .SignUp(email: email!, password: password!);
+                            .SignUp(email: email!, password: password!)
+                            .then(
+                              (value) => Get.offAndToNamed('/'),
+                            );
+                        emailController.clear();
+                        passwordController.clear();
+                        confirmController.clear();
                       }
                     },
                     child: Container(
@@ -221,7 +228,16 @@ class _SignUpState extends State<SignUp> {
                               Get.offAllNamed(
                                 '/home', // Replace with your main page route
                                 arguments: res,
+                              )!
+                                  .then(
+                                (value) => Get.snackbar(
+                                    "Chat App", "Sign In SuccessFull..",
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    backgroundColor: Colors.green),
                               );
+                              SharedPreferences pref =
+                                  await SharedPreferences.getInstance();
+                              pref.setBool("isVisited", true);
                             } else {
                               // Sign-in failed, display a Snackbar with an error message
                               Get.snackbar(
@@ -240,6 +256,7 @@ class _SignUpState extends State<SignUp> {
                               backgroundColor: Colors.red,
                               colorText: Colors.white,
                             );
+                            // Get.offAndToNamed('/home');
                           }
                         },
                         child: Container(
@@ -248,8 +265,7 @@ class _SignUpState extends State<SignUp> {
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               image: DecorationImage(
-                                image: NetworkImage(
-                                    "https://tse1.mm.bing.net/th?id=OIP.FnzI6eBMBS9n8VL7Wy39mAHaHa&pid=Api&P=0&h=180"),
+                                image: AssetImage("assets/images/google.jpeg"),
                               )),
                         ),
                       ),
@@ -266,8 +282,7 @@ class _SignUpState extends State<SignUp> {
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               image: DecorationImage(
-                                image: NetworkImage(
-                                    "https://tse4.mm.bing.net/th?id=OIP.hYAddS3gGM52qqmCreWEuAHaHa&pid=Api&P=0&h=180"),
+                                image: AssetImage("assets/images/eno.jpeg"),
                               )),
                         ),
                       ),

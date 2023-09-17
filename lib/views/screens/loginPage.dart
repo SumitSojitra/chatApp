@@ -1,3 +1,4 @@
+import 'package:chat_app/controller/controller.dart';
 import 'package:chat_app/helper/auth_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,10 +21,9 @@ class _LoginPageState extends State<LoginPage> {
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  bool pass = true;
-
   @override
   Widget build(BuildContext context) {
+    var myController = Get.put(MyController());
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -73,56 +74,64 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          validator: (val) {
-                            if (val!.isEmpty) {
-                              return "Enter valid Password..";
-                            }
-                            return null;
-                          },
-                          obscureText: pass,
-                          controller: passwordController,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.blueGrey.shade50,
-                            hintStyle:
-                                GoogleFonts.roboto(fontWeight: FontWeight.w400),
-                            hintText: "Password",
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15),
+                        child: Obx(
+                          () => TextFormField(
+                            validator: (val) {
+                              if (val!.isEmpty) {
+                                return "Enter valid Password..";
+                              }
+                              return null;
+                            },
+                            obscureText: myController.pass.value,
+                            controller: passwordController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.blueGrey.shade50,
+                              hintStyle: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.w400),
+                              hintText: "Password",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              pass = !pass;
-                            });
-                          },
-                          icon: (pass == false)
-                              ? Icon(CupertinoIcons.eye)
-                              : Icon(CupertinoIcons.eye_slash))
+                      Obx(
+                        () => IconButton(
+                            onPressed: () {
+                              myController.ShowPassWord();
+                            },
+                            icon: (myController.pass.value == false)
+                                ? Icon(CupertinoIcons.eye)
+                                : Icon(CupertinoIcons.eye_slash)),
+                      ),
                     ],
                   ),
                   SizedBox(
                     height: 50,
                   ),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       if (formKey.currentState!.validate()) {
                         formKey.currentState!.save();
-
-                        emailController.clear();
-                        passwordController.clear();
 
                         AuthHelper.authHelper
                             .SignIn(
                                 email: emailController.text,
                                 password: passwordController.text)
                             .then(
-                              (value) => Get.offAndToNamed('/home'),
+                              (value) => Get.offAndToNamed('/home')!.then(
+                                  (value) => Get.snackbar(
+                                      "Chat App", "Sign In SuccessFull..",
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      backgroundColor: Colors.green)),
                             );
+                        SharedPreferences pref =
+                            await SharedPreferences.getInstance();
+                        pref.setBool("isVisited", true);
+                        emailController.clear();
+                        passwordController.clear();
                       }
                     },
                     child: Container(
@@ -178,9 +187,16 @@ class _LoginPageState extends State<LoginPage> {
                             if (res != null) {
                               // Successfully signed in, navigate to the main page
                               Get.offAllNamed(
-                                '/', // Replace with your main page route
+                                '/home', // Replace with your main page route
                                 arguments: res,
                               );
+                              Get.snackbar("Chat App", "Sign In SuccessFull..",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.green);
+
+                              SharedPreferences pref =
+                                  await SharedPreferences.getInstance();
+                              pref.setBool("isVisited", true);
                             } else {
                               // Sign-in failed, display a Snackbar with an error message
                               Get.snackbar(
@@ -199,6 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                               backgroundColor: Colors.red,
                               colorText: Colors.white,
                             );
+                            // Get.offAndToNamed('/home');
                           }
                         },
                         child: Container(
