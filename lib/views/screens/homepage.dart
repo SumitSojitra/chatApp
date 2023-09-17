@@ -133,6 +133,7 @@ class _HomePageState extends State<HomePage> {
               ))
         ],
       ),
+      // backgroundColor: pur,
       body: StreamBuilder(
         stream: FireStoreHelper.fireStoreHelper.fetchUsers(),
         builder: (context, snapshot) {
@@ -149,6 +150,7 @@ class _HomePageState extends State<HomePage> {
                 itemCount: data.length,
                 itemBuilder: (context, index) {
                   return Card(
+                    color: bg,
                     child: ListTile(
                       onTap: () async {
                         Get.toNamed('/chat', arguments: <String>[
@@ -156,6 +158,7 @@ class _HomePageState extends State<HomePage> {
                           data[index]['uid'],
                           data[index]['email'],
                           data[index]['photo'],
+                          data[index]['name'],
                         ]);
 
                         allMessages = await FireStoreHelper.fireStoreHelper
@@ -170,7 +173,10 @@ class _HomePageState extends State<HomePage> {
                             NetworkImage("${data[index]["photo"]}"),
                       ),
                       // subtitle: Text("${data[index]['uid']}"),
-                      title: Text("${data[index]['name']}"),
+                      title: Text(
+                        "${data[index]['name']}",
+                        style: GoogleFonts.roboto(color: Colors.white),
+                      ),
                     ),
                   );
                 });

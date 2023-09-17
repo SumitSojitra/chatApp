@@ -35,7 +35,7 @@ class _ChatPageState extends State<ChatPage> {
           ),
           backgroundColor: Color(0xff0f0417),
           title: Text(
-            "${data[2].split("@")[0]}",
+            "${data[4]}",
             style: GoogleFonts.roboto(color: Colors.white),
           ),
         ),

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const Color blue = Color(0xff7091F5);
 const Color pur = Color(0xff45086e);
 const Color app = Color(0xff0f0417);
+const Color bg = Color(0xff762b99);
 Stream? allMessages;
 
 class Navigate {
