@@ -17,4 +17,6 @@ samples, guidance on mobile development, and a full API reference.
 
 ![sp](https://github.com/SumitSojitra/chatApp/assets/114163699/a4640a15-e13d-4d79-aee4-15e6e581c59b {width=100px,height=400px})
 
+<img src="[https://github.com/favicon.ico](https://github.com/SumitSojitra/chatApp/assets/114163699/a4640a15-e13d-4d79-aee4-15e6e581c59b)https://github.com/SumitSojitra/chatApp/assets/114163699/a4640a15-e13d-4d79-aee4-15e6e581c59b" width="200">
+
 
